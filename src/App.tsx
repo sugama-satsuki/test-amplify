@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
-import UserGroupAdmin from "./Admin";
+import { RequireGroup } from "./components/RequireGroup";
 
 const client = generateClient<Schema>();
 
 function App({ signOut, user, onSignUp }: { signOut?: () => void, user?: any, onSignUp?: (role: string) => Promise<void> }) {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-  const [showAdmin, setShowAdmin] = useState(false);
-  const [users, setUsers] = useState<{ id: string; username: string }[]>([]);
 
   useEffect(() => {
     client.models.Todo.observeQuery().subscribe({
@@ -42,6 +40,23 @@ function App({ signOut, user, onSignUp }: { signOut?: () => void, user?: any, on
           >{todo.content}</li>
         ))}
       </ul>
+      
+      <RequireGroup anyOf={["ADMIN"]}>
+        <section className="rounded-xl border p-4">
+          <h2 className="font-semibold">Admin Console</h2>
+          {/* admin専用UI */}
+        </section>
+      </RequireGroup>
+      <RequireGroup
+        anyOf={["editor", "ADMIN"]}
+        fallback={<p>編集権限がありません。</p>}
+      >
+        <section className="rounded-xl border p-4">
+          <h2 className="font-semibold">Editor Tools</h2>
+          {/* 編集用UI */}
+        </section>
+      </RequireGroup>
+
       {signOut && <button onClick={signOut}>ログアウト</button>}
     </main>
   );
