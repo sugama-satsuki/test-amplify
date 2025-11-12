@@ -1,20 +1,33 @@
 import { useEffect, useState } from "react";
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
+import UserGroupAdmin from "./Admin";
 
 const client = generateClient<Schema>();
 
-function App() {
+function App({ signOut, user, onSignUp }: { signOut?: () => void, user?: any, onSignUp?: (role: string) => Promise<void> }) {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [users, setUsers] = useState<{ id: string; username: string }[]>([]);
 
   useEffect(() => {
     client.models.Todo.observeQuery().subscribe({
       next: (data) => setTodos([...data.items]),
     });
-  }, []);
+
+    const role = localStorage.getItem('signup_role');
+    if (user && role && onSignUp) {
+      onSignUp(role);
+      localStorage.removeItem('signup_role');
+    }
+  }, [user, onSignUp]);
 
   function createTodo() {
     client.models.Todo.create({ content: window.prompt("Todo content") });
+  }
+
+  function deleteTodo(id: string) {
+    client.models.Todo.delete({ id })
   }
 
   return (
@@ -23,16 +36,13 @@ function App() {
       <button onClick={createTodo}>+ new</button>
       <ul>
         {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
+          <li 
+            key={todo.id}
+            onClick={() => deleteTodo(todo.id)}
+          >{todo.content}</li>
         ))}
       </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
-      </div>
+      {signOut && <button onClick={signOut}>ログアウト</button>}
     </main>
   );
 }
