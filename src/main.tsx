@@ -7,12 +7,12 @@ import { Authenticator, CheckboxField, SelectField, ThemeProvider, useAuthentica
 import '@aws-amplify/ui-react/styles.css';
 import outputs from "../amplify_outputs.json";
 import { I18n } from "aws-amplify/utils";
-import { generateClient } from "aws-amplify/api";
-import { Schema } from "$amplify/data/resource.ts";
+// import { generateClient } from "aws-amplify/api";
+// import { Schema } from "$amplify/data/resource.ts";
 
 
 Amplify.configure(outputs);
-const client = generateClient<Schema>();
+// const client = generateClient<Schema>();
 
 const myTheme = {
   name: 'my-theme',
