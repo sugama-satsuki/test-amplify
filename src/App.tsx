@@ -13,16 +13,22 @@ function App({ signOut, user, onSignUp }: { signOut?: () => void, user?: any, on
   const [projectDesc, setProjectDesc] = useState("");
 
   useEffect(() => {
-    client.models.Project.observeQuery().subscribe({
-      next: (data) => setProjects([...data.items]),
-    });
-
-    const role = localStorage.getItem('signup_role');
-    if (user && role && onSignUp) {
-      onSignUp(role);
-      localStorage.removeItem('signup_role');
-    }
-  }, [user, onSignUp]);
+    console.log("Current user:", user, client.models?.Project);
+    if (!user || !client.models?.Project) { return; }
+    const sub = client.models.Project
+      // 認証方法をuserPoolに指定
+      .observeQuery({ authMode: "userPool" })
+      .subscribe({
+        next: (data) => setProjects([...data.items]),
+        error: (e: any) => {
+          console.error("Project observeQuery error", e);
+          if (e?.errors) {
+            console.error("GraphQL errors:", JSON.stringify(e.errors, null, 2));
+          }
+        }
+      });
+    return () => sub.unsubscribe();
+  }, [user]);
 
   function openModal() {
     setProjectName("");
@@ -31,13 +37,21 @@ function App({ signOut, user, onSignUp }: { signOut?: () => void, user?: any, on
   }
 
   async function handleCreateProject() {
-    if (!projectName) return;
-    await client.models.Project.create({
-      name: projectName,
-      description: projectDesc,
-      userId: user?.username || "",
-    });
-    setShowModal(false);
+    if (!projectName || !user) { return; }
+    try {
+      const res = await client.models.Project.create(
+        {
+          name: projectName,
+          description: projectDesc,
+          userId: user.username || "",
+        },
+        { authMode: "userPool" } // 追加
+      );
+      console.log("create result", res);
+      setShowModal(false);
+    } catch (e) {
+      console.error("Project create error", e);
+    }
   }
 
   function deleteProject(id: string) {
