@@ -76,15 +76,15 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <App 
             signOut={signOut}
             user={user}
-            onSignUp={async (role: string) => {
-              const userId = user?.username;
-              if (userId && role) {
-                await client.functions.addUserToGroup({
-                  userId,
-                  groupName: role
-                });
-              }
-            }}
+            // onSignUp={async (role: string) => {
+            //   const userId = user?.username;
+            //   if (userId && role) {
+            //     await client.mutations.addUserToGroup({
+            //       userId,
+            //       groupName: role
+            //     });
+            //   }
+            // }}
           />
         )}
       </Authenticator>
