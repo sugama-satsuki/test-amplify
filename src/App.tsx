@@ -6,7 +6,7 @@ import { RequireGroup } from "./components/RequireGroup";
 const client = generateClient<Schema>();
 
 function App({ signOut, user, onSignUp }: { signOut?: () => void, user?: any, onSignUp?: (role: string) => Promise<void> }) {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  // const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
   const [projects, setProjects] = useState<Array<Schema["Project"]["type"]>>([]);
   const [showModal, setShowModal] = useState(false);
   const [projectName, setProjectName] = useState("");
